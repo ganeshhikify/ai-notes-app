@@ -1,31 +1,42 @@
 import { useState } from 'react';
 
 function App() {
-  // 1. Memory boxes (State) to store what the user types and what the AI returns
   const [notes, setNotes] = useState('');
   const [summary, setSummary] = useState('');
   const [keyPoints, setKeyPoints] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 2. What happens when the user clicks "Summarize Notes"
-  const handleSummarize = () => {
+  // Now this function talks directly to your Cloudflare Worker!
+  const handleSummarize = async () => {
     if (!notes.trim()) {
       alert('Please paste some notes first!');
       return;
     }
 
     setLoading(true);
+    setSummary('');
+    setKeyPoints([]);
 
-    // Fake test result for Hour 2 (We will connect real Gemini AI in Hour 4!)
-    setTimeout(() => {
-      setSummary('This is a simple English summary of your pasted notes.');
-      setKeyPoints([
-        'First important point from your notes',
-        'Second important point from your notes',
-        'Third important point from your notes',
-      ]);
+    try {
+      // 1. Send your notes to the Cloudflare Worker on port 8787
+      const response = await fetch('http://localhost:8787', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes }),
+      });
+
+      // 2. Read the JSON reply coming back from the Worker
+      const data = await response.json();
+
+      // 3. Display the Worker's reply on your screen
+      setSummary(data.summary);
+      setKeyPoints(data.keyPoints);
+    } catch (error) {
+      alert('Could not reach the backend! Make sure your Cloudflare Worker is running.');
+      console.error(error);
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   return (
@@ -33,7 +44,6 @@ function App() {
       <h1>AI Notes Summarizer</h1>
       <p>Paste your lengthy notes below to get a simple summary and key points.</p>
 
-      {/* Big Input Box */}
       <textarea
         rows="8"
         placeholder="Paste your lengthy notes here..."
@@ -42,7 +52,6 @@ function App() {
         style={{ width: '100%', padding: '12px', fontSize: '16px', borderRadius: '8px' }}
       />
 
-      {/* Action Buttons */}
       <div style={{ marginTop: '12px', display: 'flex', gap: '10px' }}>
         <button
           onClick={handleSummarize}
@@ -60,7 +69,6 @@ function App() {
         </button>
       </div>
 
-      {/* Result Section (Only shows up once a summary exists) */}
       {summary && (
         <div style={{ marginTop: '30px', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
           <h2>Simple Summary</h2>
