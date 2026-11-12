@@ -1,122 +1,81 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState } from 'react';
 
 function App() {
-  const [count, setCount] = useState(0)
+  // 1. Memory boxes (State) to store what the user types and what the AI returns
+  const [notes, setNotes] = useState('');
+  const [summary, setSummary] = useState('');
+  const [keyPoints, setKeyPoints] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // 2. What happens when the user clicks "Summarize Notes"
+  const handleSummarize = () => {
+    if (!notes.trim()) {
+      alert('Please paste some notes first!');
+      return;
+    }
+
+    setLoading(true);
+
+    // Fake test result for Hour 2 (We will connect real Gemini AI in Hour 4!)
+    setTimeout(() => {
+      setSummary('This is a simple English summary of your pasted notes.');
+      setKeyPoints([
+        'First important point from your notes',
+        'Second important point from your notes',
+        'Third important point from your notes',
+      ]);
+      setLoading(false);
+    }, 800);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
+    <div style={{ maxWidth: '700px', margin: '40px auto', padding: '20px', fontFamily: 'sans-serif' }}>
+      <h1>AI Notes Summarizer</h1>
+      <p>Paste your lengthy notes below to get a simple summary and key points.</p>
+
+      {/* Big Input Box */}
+      <textarea
+        rows="8"
+        placeholder="Paste your lengthy notes here..."
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        style={{ width: '100%', padding: '12px', fontSize: '16px', borderRadius: '8px' }}
+      />
+
+      {/* Action Buttons */}
+      <div style={{ marginTop: '12px', display: 'flex', gap: '10px' }}>
         <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+          onClick={handleSummarize}
+          disabled={loading}
+          style={{ padding: '10px 20px', fontSize: '16px', cursor: 'pointer' }}
         >
-          Count is {count}
+          {loading ? 'Summarizing...' : 'Summarize Notes'}
         </button>
-      </section>
 
-      <div className="ticks"></div>
+        <button
+          onClick={() => { setNotes(''); setSummary(''); setKeyPoints([]); }}
+          style={{ padding: '10px 20px', fontSize: '16px', cursor: 'pointer' }}
+        >
+          Clear
+        </button>
+      </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
+      {/* Result Section (Only shows up once a summary exists) */}
+      {summary && (
+        <div style={{ marginTop: '30px', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
+          <h2>Simple Summary</h2>
+          <p>{summary}</p>
+
+          <h3>Important Points</h3>
           <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
+            {keyPoints.map((point, index) => (
+              <li key={index}>{point}</li>
+            ))}
           </ul>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
